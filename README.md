@@ -17,7 +17,7 @@ Unlike software implementations that evaluate nodes sequentially, this engine us
 The design is structured as a decoupled control-data-path system. Top-level integration manages the flow of data between the user input sequencer, the core algorithmic solver (FSM + Comparator Tree), and external display/serial reporting peripherals.
 
 ```mermaid
-flowchart LR
+flowchart TD
     %% --- Custom Styling & Node Shapes ---
     classDef io fill:#f9f,stroke:#333,stroke-width:1px
     classDef mem fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
