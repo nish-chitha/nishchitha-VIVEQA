@@ -17,7 +17,7 @@ Unlike software implementations that evaluate nodes sequentially, this engine us
 The design is structured as a decoupled control-data-path system. Top-level integration manages the flow of data between the user input sequencer, the core algorithmic solver (FSM + Comparator Tree), and external display/serial reporting peripherals.
 
 
-
+```mermaid
 flowchart TD
     A[16-Bit Button Input] -->|Raw Input| B[keypad_sequencer<br/>Debounce + Decoder]
     B -->|src_node / tgt_node| C[dijkstra_fsm<br/>Algorithm Controller]
@@ -31,3 +31,4 @@ flowchart TD
     G -->|prev array / dist| H[route_reporter<br/>Path Unwinder + UART Format]
     H -->|Byte Stream| I[uart_tx<br/>Serial Transmitter]
     I -->|TX Pin| J[PC Terminal / Serial Monitor]
+```
