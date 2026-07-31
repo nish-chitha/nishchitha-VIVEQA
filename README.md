@@ -6,7 +6,7 @@ A hardware implementation of **Dijkstra's Shortest Path Algorithm** using **Veri
 
 ## 📌 Project Overview
 
-This project implements **Dijkstra's Shortest Path Algorithm** entirely in hardware using **Verilog HDL** on a **AT-STLN-ARTIX 7-001 FPGA Development Board,**. The weighted graph is stored in Block RAM (BRAM), and the shortest path is computed using a dedicated Finite State Machine (FSM).
+This project implements **Dijkstra's Shortest Path Algorithm** entirely in hardware using **Verilog HDL** on a **AT-STLN-ARTIX 7-001 FPGA Development Board**. The weighted graph is stored in Block RAM (BRAM), and the shortest path is computed using a dedicated Finite State Machine (FSM).
 
 The source and destination nodes are selected using a **4×4 matrix keypad** connected to the FPGA. Once the computation is complete, the FPGA transmits the result to a **Python web application**, which displays the shortest route on an interactive map along with the total distance and computation time.
 
@@ -153,7 +153,6 @@ Once the destination node is reached, the reconstructed shortest path is transmi
 ## 📊 Results
 
 The proposed hardware accelerator was successfully implemented and verified on the AMD Xilinx Artix-7 FPGA. The design correctly computes the shortest path between multiple source and destination node combinations entered through the 4×4 matrix keypad.
-
 The FPGA transmits the computed route to a Python visualization interface, which displays the shortest path on an interactive map together with the total travel distance and execution time. The successful integration of FPGA hardware and software visualization demonstrates the correctness and efficiency of the proposed implementation.
 ---
 
