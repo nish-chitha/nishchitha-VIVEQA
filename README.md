@@ -152,8 +152,13 @@ Once the destination node is reached, the reconstructed shortest path is transmi
 
 ## 📊 Results
 
-The proposed hardware accelerator was successfully implemented and verified on the AMD Xilinx Artix-7 FPGA. The design correctly computes the shortest path between multiple source and destination node combinations entered through the 4×4 matrix keypad.
-The FPGA transmits the computed route to a Python visualization interface, which displays the shortest path on an interactive map together with the total travel distance and execution time. The successful integration of FPGA hardware and software visualization demonstrates the correctness and efficiency of the proposed implementation.
+
+The proposed hardware accelerator was successfully implemented and verified on the AT-STLN-ARTIX 7-001 FPGA Development Board. The design correctly computes the shortest path between multiple source and destination node combinations entered through the 4×4 matrix keypad.
+
+The FPGA transmits the computed route to a Python-based visualization interface, which displays the shortest path on an interactive map together with the total travel distance and execution time. The successful integration of FPGA hardware and software visualization demonstrates the correctness and efficiency of the proposed implementation.
+
+
+
 ---
 
 ## 🚀 Future Improvements
