@@ -1,12 +1,12 @@
 # FPGA Implementation of Dijkstra's Shortest Path Algorithm
 
-A hardware implementation of **Dijkstra's Shortest Path Algorithm** using **Verilog HDL** on a **Xilinx FPGA**. The system computes the shortest path between user-selected nodes and visualizes the result through a **Python-based interactive web application**.
+A hardware implementation of **Dijkstra's Shortest Path Algorithm** using **Verilog HDL** on a **AT-STLN-ARTIX 7-001 FPGA Development Board**. The system computes the shortest path between user-selected nodes and visualizes the result through a **Python-based interactive web application**.
 
 ---
 
 ## 📌 Project Overview
 
-This project implements **Dijkstra's Shortest Path Algorithm** entirely in hardware using **Verilog HDL** on a **Xilinx FPGA**. The weighted graph is stored in Block RAM (BRAM), and the shortest path is computed using a dedicated Finite State Machine (FSM).
+This project implements **Dijkstra's Shortest Path Algorithm** entirely in hardware using **Verilog HDL** on a **AT-STLN-ARTIX 7-001 FPGA Development Board,**. The weighted graph is stored in Block RAM (BRAM), and the shortest path is computed using a dedicated Finite State Machine (FSM).
 
 The source and destination nodes are selected using a **4×4 matrix keypad** connected to the FPGA. Once the computation is complete, the FPGA transmits the result to a **Python web application**, which displays the shortest route on an interactive map along with the total distance and computation time.
 
@@ -18,7 +18,7 @@ This project demonstrates the integration of **digital hardware design**, **seri
 
 - Hardware implementation of Dijkstra's Algorithm
 - Verilog HDL based modular architecture
-- Xilinx FPGA implementation
+- AT-STLN-ARTIX 7-001 FPGA implementation
 - 4×4 Matrix Keypad user input
 - BRAM-based graph storage
 - FSM-controlled shortest path computation
@@ -31,9 +31,9 @@ This project demonstrates the integration of **digital hardware design**, **seri
 
 ## 🛠 Hardware Platform
 
-- Xilinx FPGA Development Board
+- AT-STLN-ARTIX 7-001 FPGA Development Board
 - 4×4 Matrix Keypad
-- USB-UART Interface
+- FTDI USB-UART Interface
 - Host Computer
 
 ---
@@ -48,47 +48,73 @@ This project demonstrates the integration of **digital hardware design**, **seri
 
 ---
 
-## 🏗 System Architecture
 
+## 🏛️ Design and Architecture
+
+### System Architecture
+The design is structured as a decoupled control-data-path system. Top-level integration manages the flow of data between the user input sequencer, the core algorithmic solver (FSM + Comparator Tree), and external display/serial reporting peripherals.
+
+```mermaid
+flowchart TD
+    %% --- Custom Styling & Node Shapes ---
+    classDef io fill:#f9f,stroke:#333,stroke-width:1px
+    classDef mem fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
+    classDef ctrl fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+
+    %% --- Input Section ---
+    subgraph INPUT [" User Input & Sequencing "]
+        A(["16-Bit Keypad Array"]):::io
+        B["keypad_sequencer<br/>(Debounce & Decode)"]
+    end
+
+    %% --- Processing Engine ---
+    subgraph ENGINE [" Dijkstra's Core Processing Engine "]
+        C["dijkstra_fsm<br/>(Algorithm Controller)"]:::ctrl
+        F["comparator_tree<br/>(Parallel Min-Finder)"]
+        
+        subgraph MEM [" On-Chip Block Memory "]
+            E[("bram_adj_matrix<br/>16x16 Road Network")]:::mem
+            G[("bram_dist_visited<br/>Node State Memory")]:::mem
+        end
+    end
+
+    %% --- Output Section ---
+    subgraph OUTPUT [" Display & Serial Reporting "]
+        D["lcd_controller<br/>(16x2 Display Driver)"]
+        H["route_reporter<br/>(Path Unwinder + Formatter)"]
+        I["uart_tx<br/>(Serial Transmitter)"]
+        J(["PC Serial Monitor"]):::io
+    end
+
+    %% --- Connections ---
+    A -->|"Raw Input"| B
+    B -->|"src_node / tgt_node"| C
+    B -->|"State / Status"| D
+    
+    C <-->|"Edge Weights"| E
+    C <-->|"Update Dist / Prev"| G
+    C -->|"Start / Latch"| F
+    F <-->|"Read dist_flat"| G
+    
+    G -->|"prev[] / dist"| H
+    H -->|"8-bit ASCII Stream"| I
+    I -->|"TX Pin"| J
 ```
-              4×4 Matrix Keypad
-                      │
-                      ▼
-             Keypad Sequencer
-                      │
-                      ▼
-              Dijkstra FSM
-                      │
-        ┌─────────────┴─────────────┐
-        ▼                           ▼
- Graph BRAM                 Distance / Visited BRAM
- (Adjacency Matrix)         & Predecessor Memory
-                      │
-                      ▼
-              Comparator Logic
-                      │
-                      ▼
-              Route Reporter
-                      │
-                      ▼
-               UART Transmitter
-                      │
-                      ▼
-             Python Web Application
-                      │
-                      ▼
-        Interactive Route Visualization
-```
+
+
+
+
 
 ---
 
 ## ⚙ Implementation Approach
 
-The weighted graph is stored as an adjacency matrix inside FPGA Block RAM. When the user selects the source and destination nodes using the 4×4 keypad, the Dijkstra FSM initializes the graph data and begins the shortest path computation.
 
-The FSM repeatedly selects the minimum unvisited node using comparator logic, updates the shortest distances of neighboring nodes, and stores predecessor information in BRAM. After the destination node is reached, the shortest route is reconstructed and transmitted to the host computer through UART.
+The weighted road network is stored as an adjacency matrix in on-chip Block RAM (BRAM). After the user selects the source and destination nodes through the 4×4 matrix keypad, the keypad sequencer decodes the input and forwards it to the Dijkstra FSM.
 
-A Python-based web application receives the transmitted data, processes the computed route, and displays it on an interactive map. The interface also presents the total distance and computation time, providing an intuitive visualization of the FPGA-generated output.
+The FSM initializes the node data and repeatedly selects the minimum unvisited node using comparator logic. Neighboring edge weights are read from BRAM, distances are updated whenever a shorter path is found, and predecessor information is stored for route reconstruction.
+
+Once the destination node is reached, the reconstructed shortest path is transmitted via UART to a Python application. Using PySerial and Pygame, the application visualizes the computed route on an interactive map while displaying the total distance and hardware computation time.
 
 ---
 
@@ -110,7 +136,7 @@ A Python-based web application receives the transmitted data, processes the comp
 
 ---
 
-## 🔄 Project Workflow
+## 🔄 System Workflow
 
 1. User selects the source node using the 4×4 keypad.
 2. User selects the destination node.
@@ -126,10 +152,9 @@ A Python-based web application receives the transmitted data, processes the comp
 
 ## 📊 Results
 
-The proposed system was successfully implemented and validated on FPGA hardware. The hardware implementation accurately computes the shortest path for multiple source and destination combinations.
+The proposed hardware accelerator was successfully implemented and verified on the AMD Xilinx Artix-7 FPGA. The design correctly computes the shortest path between multiple source and destination node combinations entered through the 4×4 matrix keypad.
 
-The computed route is transmitted from the FPGA to a Python-based web application, where it is visualized on an interactive map. The interface displays the complete route, total travel distance, and execution time, demonstrating seamless integration between FPGA hardware and software visualization.
-
+The FPGA transmits the computed route to a Python visualization interface, which displays the shortest path on an interactive map together with the total travel distance and execution time. The successful integration of FPGA hardware and software visualization demonstrates the correctness and efficiency of the proposed implementation.
 ---
 
 ## 🚀 Future Improvements
