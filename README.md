@@ -16,19 +16,49 @@ Unlike software implementations that evaluate nodes sequentially, this engine us
 ### System Architecture
 The design is structured as a decoupled control-data-path system. Top-level integration manages the flow of data between the user input sequencer, the core algorithmic solver (FSM + Comparator Tree), and external display/serial reporting peripherals.
 
-
 ```mermaid
-flowchart TD
-    A[16-Bit Button Input] -->|Raw Input| B[keypad_sequencer<br/>Debounce + Decoder]
-    B -->|src_node / tgt_node| C[dijkstra_fsm<br/>Algorithm Controller]
-    B -->|State / Status| D[lcd_controller<br/>16x2 Display Driver]
+flowchart LR
+    %% --- Custom Styling & Node Shapes ---
+    classDef io fill:#f9f,stroke:#333,stroke-width:1px
+    classDef mem fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
+    classDef ctrl fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+
+    %% --- Input Section ---
+    subgraph INPUT [" User Input & Sequencing "]
+        A(["16-Bit Keypad Array"]):::io
+        B["keypad_sequencer<br/>(Debounce & Decode)"]
+    end
+
+    %% --- Processing Engine ---
+    subgraph ENGINE [" Dijkstra's Core Processing Engine "]
+        C["dijkstra_fsm<br/>(Algorithm Controller)"]:::ctrl
+        F["comparator_tree<br/>(Parallel Min-Finder)"]
+        
+        subgraph MEM [" On-Chip Block Memory "]
+            E[("bram_adj_matrix<br/>16x16 Road Network")]:::mem
+            G[("bram_dist_visited<br/>Node State Memory")]:::mem
+        end
+    end
+
+    %% --- Output Section ---
+    subgraph OUTPUT [" Display & Serial Reporting "]
+        D["lcd_controller<br/>(16x2 Display Driver)"]
+        H["route_reporter<br/>(Path Unwinder + Formatter)"]
+        I["uart_tx<br/>(Serial Transmitter)"]
+        J(["PC Serial Monitor"]):::io
+    end
+
+    %% --- Connections ---
+    A -->|"Raw Input"| B
+    B -->|"src_node / tgt_node"| C
+    B -->|"State / Status"| D
     
-    C <-->|Edge Weights| E[bram_adj_matrix<br/>16x16 Road Network]
-    C -->|Start / Control| F[comparator_tree<br/>Parallel Min-Finder]
-    C <-->|Update Dist / Prev| G[bram_dist_visited<br/>Node State Memory]
+    C <-->|"Edge Weights"| E
+    C <-->|"Update Dist / Prev"| G
+    C -->|"Start / Latch"| F
+    F <-->|"Read dist_flat"| G
     
-    F <-->|Read dist_flat| G
-    G -->|prev array / dist| H[route_reporter<br/>Path Unwinder + UART Format]
-    H -->|Byte Stream| I[uart_tx<br/>Serial Transmitter]
-    I -->|TX Pin| J[PC Terminal / Serial Monitor]
+    G -->|"prev[] / dist"| H
+    H -->|"8-bit ASCII Stream"| I
+    I -->|"TX Pin"| J
 ```
