@@ -43,11 +43,8 @@ This project demonstrates the integration of **digital hardware design**, **seri
 - Verilog HDL
 - Xilinx Vivado
 - Python 3
-- Flask
+- Pygame
 - PySerial
-- HTML
-- CSS
-- JavaScript
 
 ---
 
